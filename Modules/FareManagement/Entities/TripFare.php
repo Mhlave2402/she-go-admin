@@ -58,6 +58,17 @@ class TripFare extends Model
         return $this->belongsTo(ZoneWiseDefaultTripFare::class, 'zone_wise_default_trip_fare_id');
     }
 
+    public function calculateTotalFare($distance, $waitingTime, $idleTime, $tripDelayTime, $hasBabySeat)
+    {
+        $totalFare = $this->base_fare + ($this->base_fare_per_km * $distance) + ($this->waiting_fee_per_min * $waitingTime) + ($this->idle_fee_per_min * $idleTime) + ($this->trip_delay_fee_per_min * $tripDelayTime);
+
+        if ($hasBabySeat) {
+            $totalFare += $this->vehicleCategory->baby_seat_price;
+        }
+
+        return $totalFare;
+    }
+
     protected static function newFactory()
     {
         return \Modules\FareManagement\Database\factories\TripFareFactory::new();

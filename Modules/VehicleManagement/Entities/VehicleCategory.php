@@ -24,6 +24,8 @@ class VehicleCategory extends Model
         'image',
         'type',
         'is_active',
+        'has_baby_seat',
+        'baby_seat_price',
         'deleted_at',
         'created_at',
         'updated_at',
@@ -36,6 +38,7 @@ class VehicleCategory extends Model
      */
     protected $casts = [
         'is_active' => 'boolean',
+        'has_baby_seat' => 'boolean',
     ];
 
     public function vehicles()

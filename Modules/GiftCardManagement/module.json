@@ -1,0 +1,11 @@
+{
+    "name": "GiftCardManagement",
+    "alias": "giftcardmanagement",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\GiftCardManagement\\Providers\\GiftCardManagementServiceProvider"
+    ],
+    "files": []
+}
