@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\AdminModule\Entities\ActivityLog;
-use Modules\AdminModule\Entities\AdminNotification;
 use Modules\ChattingManagement\Entities\ChannelConversation;
 use Modules\ChattingManagement\Entities\ChannelList;
 use Modules\ParcelManagement\Entities\ParcelInformation;
@@ -67,6 +66,7 @@ class TripRequest extends Model
         'tips',
         'is_paused',
         'map_screenshot',
+        'scheduled_ride',
         'deleted_at',
         'created_at',
         'updated_at',
@@ -275,61 +275,4 @@ class TripRequest extends Model
                 $log = new ActivityLog();
                 $log->edited_by = auth()->user()->id ?? 'user_update';
                 $log->before = $array;
-                $log->after = $item->changes;
-                $item->logs()->save($log);
-            }
-            if ($item->current_status == 'cancelled') {
-                if ($item->type == 'parcel') {
-                    $message = 'a_parcel_request_is_cancelled';
-                } else {
-                    $message = 'a_trip_request_is_cancelled';
-                }
-                $notification = new AdminNotification();
-                $notification->model = 'trip_request';
-                $notification->model_id = $item->id;
-                $notification->message = $message;
-                $notification->save();
-            }
-            if ($item->driver_id && $item->isDirty('current_status')) {
-                $track = TimeTrack::query()
-                    ->where(['user_id' => $item->driver_id, 'date' => date('Y-m-d')])
-                    ->latest()->first();
-
-                if (!$track) {
-                    $track = TimeTrack::query()
-                        ->where(['user_id' => $item->driver_id])
-                        ->latest()->first();
-                }
-                $driver = DriverDetail::query()->firstWhere('user_id', $item->driver_id);
-
-                if ($item->current_status == ACCEPTED) {
-
-                    $driver->availability_status = 'on_trip';
-                    $driver->save();
-
-                    $duration = Carbon::parse($track->last_ride_completed_at)->diffInMinutes();
-                    $track->last_ride_started_at = now();
-                    $track->total_idle += $duration;
-                    $track->save();
-                } elseif ($item->current_status == 'completed' || $item->current_status == 'cancelled') {
-
-                    $driver->availability_status = 'available';
-                    $driver->save();
-                    $duration = Carbon::parse($track->last_ride_started_at)->diffInMinutes();
-                    $track->last_ride_completed_at = now();
-                    $track->total_driving += $duration;
-                    $track->save();
-                }
-            }
-        });
-
-        static::deleted(function ($item) {
-            $log = new ActivityLog();
-            $log->edited_by = auth()->user()->id;
-            $log->before = $item->original;
-            $item->logs()->save($log);
-        });
-
-
-    }
-}
+                $log->after = $item

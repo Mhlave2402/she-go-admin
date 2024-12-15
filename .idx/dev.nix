@@ -11,6 +11,7 @@
     pkgs.phpPackages.phpunit
     pkgs.nodejs_20
     pkgs.nodePackages.nodemon
+    pkgs.nixos-rebuild
     pkgs.git
     pkgs.curl
   ];

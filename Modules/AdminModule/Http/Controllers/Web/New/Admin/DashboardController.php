@@ -34,28 +34,28 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DashboardController extends BaseController
 {
-    protected $zoneService;
-    protected $tripRequestService;
-    protected $transactionService;
-    protected $userAccountService;
-    protected $driverService;
-    protected $customerService;
-    protected $employeeService;
+    // ... existing code ...
 
-    protected $channelListService;
-
-    protected $channelUserService;
-
-    protected $supportSavedReplyService;
-
-    protected $channelConversationService;
-
-    public function __construct(ZoneServiceInterface              $zoneService, TripRequestServiceInterface $tripRequestService,
-                                TransactionServiceInterface       $transactionService, UserAccountServiceInterface $userAccountService,
-                                DriverServiceInterface            $driverService, CustomerServiceInterface $customerService, EmployeeServiceInterface $employeeService,
-                                ChannelListServiceInterface       $channelListService, ChannelUserServiceInterface $channelUserService,
-                                SupportSavedReplyServiceInterface $supportSavedReplyService, ChannelConversationServiceInterface $channelConversationService
-    )
+    public function realTimeMonitoring()
+    {
+        $drivers = $this->driverService->getBy(criteria: ['user_type' => DRIVER, 'is_active' => 1]);
+        $markers = $drivers->map(function ($driver) {
+            return [
+                'position' => [
+                    'lat' => $driver?->lastLocations?->latitude ? (double)$driver?->lastLocations?->latitude : 0, // Default to 0 if not defined
+                    'lng' => $driver?->lastLocations?->longitude ? (double)$driver?->lastLocations?->longitude : 0, // Default to 0 if not defined
+                ],
+                'title' => $driver->full_name ?? ($driver?->first_name ? $driver?->first_name . ' ' . $driver?->last_name : "N/A"),
+                'subtitle' => null,
+                'driver' => $driver?->id ? route('admin.driver.show', ['id' => $driver?->id]) : '#',
+                'trip' => null,
+                'icon' => asset('/public/assets/admin-module/img/maps/driver.png'),
+            ];
+        });
+        $markers = json_encode($markers);
+        return view('adminmodule::real-time-monitoring', compact('markers'));
+    }
+}
     {
         parent::__construct($zoneService);
         $this->zoneService = $zoneService;

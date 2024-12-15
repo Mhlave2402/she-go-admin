@@ -1,0 +1,11 @@
+{
+    "name": "CurrencyManagement",
+    "alias": "currencymanagement",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\CurrencyManagement\\Providers\\CurrencyManagementServiceProvider"
+    ],
+    "files": []
+}
